@@ -1,2 +1,2 @@
-# custom_scripts
+# Custom scripts
 General repository with custom scripts for data processing, bioinformatic workflows and downstream analysis
