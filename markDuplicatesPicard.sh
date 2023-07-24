@@ -1,17 +1,16 @@
 #!/bin/bash -l
-#SBATCH -A naiss2023-22-153
+#SBATCH -A snic2022-22-85
 #SBATCH -p core -n 8
 #SBATCH -t 24:00:00
 #SBATCH -J markDuplicates
 
+# Script for marking duplicates from BAM files using Picard.
 module load bioinfo-tools
 module load picard/2.23.4
 module load samtools/1.12
 
-inputdir=$(realpath $1)  # Path to original sorted BAM files (can be coordinate-sorted or query-sorted)
-outdir=$(realpath $2) # Output directory
-
-# Script for marking duplicated reads in BAM files using Picard (https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard-)
+inputdir=$(realpath $1) # Input directory with sorted BAM files
+outdir=$(realpath $2) # Output direcory
 
 cd $SNIC_TMP
 
