@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 
-
 # Load the library.
 library(DESeq2)
 library(data.table)

@@ -6,14 +6,14 @@ library(data.table)
 library(openxlsx)
 
 # Path to salmon quantification folders:
-salmonDir <- "/home/akram/MondalLab/NCC_RNAseq/diffExpAnalysis_nccProject/salmon_quant/salmon_quant_be2_tncc_batch/"
+salmonDir <- "/salmon_quant/salmon_quant_cellType1_cellType2_batch/"
 
 #Get complete paths for Salmon quantification files at the transcript level, Salmon files are named as "quant.sf"
 salmon_samples <- list.files(salmonDir,recursive = T,pattern = "quant.sf",full.names = T)
 
 # Read sample information table, it can be a CSV file: 
 # This table must have at least the following columns so as to Tximport to read the files: "files", "names", "replicate", "condition"
-metadata_salmon <- fread("~/gitrepos/bioinfopipes/lab/geneLists/salmonSamplesInfo_coldata_be2_batch202208.csv", sep=",", header = T)
+metadata_salmon <- fread("salmonSamplesInfo_coldata_cellType1.csv", sep=",", header = T)
 
 #Import salmon files and summarize counts at the gene level:
 library(org.Sc.sgd.db) # Saccharomyces cerevicie annotations.You can install it with: BiocManager::install("org.Sc.sgd.db", update=FALSE)

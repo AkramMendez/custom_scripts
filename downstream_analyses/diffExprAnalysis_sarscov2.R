@@ -10,10 +10,10 @@ library("ggtext")
 
 args = commandArgs(trailingOnly=TRUE)
 
-#inputdir <- "/crex/proj/nb_storage/private/BEA21P074_Roshan_Vaid/mappings/covid19_infected_cells/nodup_uniq_alns/all"
-#annotation_file<-"/crex/proj/nb_project/private/genomes/custom_reference_genomes/chlSab2_wuhCor1_ecoliK12_ncbiGenes_chroms_concat.gtf"
-inputdir <- "/home/akram/MondalLab/BEA21P074_Roshan_Vaid/mappings/covid19_infected_cells/nodup_uniq_alns/all/"
-annotation_file<-"/home/akram/genomes/custom_reference_genomes/chlSab2_wuhCor1_ecoliK12_ncbiGenes_chroms_concat.gtf"
+#inputdir <- "/crex/proj/nb_storage/mappings/covid19_infected_cells/nodup_uniq_alns/all"
+#annotation_file<-"/crex/proj/nb_project/genomes/custom_reference_genomes/chlSab2_wuhCor1_ecoliK12_ncbiGenes_chroms_concat.gtf"
+inputdir <- "mappings/covid19_infected_cells/nodup_uniq_alns/all/"
+annotation_file<-"/genomes/custom_reference_genomes/chlSab2_wuhCor1_ecoliK12_ncbiGenes_chroms_concat.gtf"
 #metadata_path <- args[2]
 threads <- 1
 
@@ -51,7 +51,7 @@ counts_scov2<-featureCounts_scov2$counts
 colnames(counts_scov2)<-gsub("_S\\d+.*$","",colnames(counts_scov2),perl=TRUE)
 fwrite(as.data.frame(counts_scov2),"counts_infectedCellsAll_cov2_nodup_uniq.tsv",col.names=T,sep="\t", row.names =T)
 
-#counts_scov2<-fread("/home/akram/MondalLab/BEA21P074_Roshan_Vaid/mappings/covid19_infected_cells/nodup_uniq_alns/all/counts_infectedCellsAll_cov2_nodup_uniq.tsv",header = T,sep="\t")
+#counts_scov2<-fread("mappings/covid19_infected_cells/nodup_uniq_alns/all/counts_infectedCellsAll_cov2_nodup_uniq.tsv",header = T,sep="\t")
 #counts_scov2 <- counts_scov2 %>% column_to_rownames(.,"V1")
 # Check that sample names match those from the design matrix metadata
 if(!all(colnames(counts_scov2) %in% rownames(metadata))){
@@ -77,7 +77,7 @@ normalized_counts<- counts(dds, normalized=TRUE)
 
 normalized_counts<-normalized_counts %>% as.data.frame() %>%  mutate(gene=rownames(normalized_counts))
 
-fwrite(normalized_counts,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/normalizedCounts_diffexpAnalysis.tsv",sep="\t",col.names = T)
+fwrite(normalized_counts,"/plots/tables/normalizedCounts_diffexpAnalysis.tsv",sep="\t",col.names = T)
 #results_all<-results(dds)
 
 wu_vs_vero<-results(dds,contrast = c("type","B.1","Vero"),alpha = 0.01) %>% as.data.frame() %>%  mutate(gene=rownames(.)) %>% mutate(contrast="wu_vs_vero")
@@ -101,12 +101,12 @@ res_all<-rbind(wu_vs_vero,uk_vs_vero,sa_vs_vero)
 
 res_all_lfcShrink<-rbind(wu_vs_vero_lfcShrink,uk_vs_vero_lfcShrink,sa_vs_vero_lfcShrink)
 
-fwrite(res_all,"/home/akram/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/diffexp_infected_vs_noninfected_by_strain.tsv",col.names = T,sep="\t")
-fwrite(res_all_lfcShrink,"/home/akram/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/diffexp_infected_vs_noninfected_by_strain_lfcShrink.tsv",col.names = T,sep="\t")
-#res_all_lfcShrink<-fread("/home/akram/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/diffexp_infected_vs_noninfected_by_strain_lfcShrink.tsv",header = T,sep="\t")
+fwrite(res_all,"differentialExpression/diffexp_infected_vs_noninfected_by_strain.tsv",col.names = T,sep="\t")
+fwrite(res_all_lfcShrink,"differentialExpression/diffexp_infected_vs_noninfected_by_strain_lfcShrink.tsv",col.names = T,sep="\t")
+#res_all_lfcShrink<-fread("differentialExpression/diffexp_infected_vs_noninfected_by_strain_lfcShrink.tsv",header = T,sep="\t")
 
 res_all_lfcShrink %>% filter(!(gene %in% cov2genes) & !grepl("gene-",gene)) %>% arrange(dplyr::desc(contrast),dplyr::desc(log2FoldChange),padj) %>% dplyr::select(contrast,gene,symbol,gene_name,log2FoldChange,pvalue,padj,lfcSE,baseMean) %>% distinct() %>% 
-  openxlsx::write.xlsx(.,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/Table_differentialExpressionAnalysis.xls")
+  openxlsx::write.xlsx(.,"/plots/tables/Table_differentialExpressionAnalysis.xls")
 
 deg_tables <- list(
   "B.1_vs_NonInfectedVero"= res_all_lfcShrink %>% filter(!(gene %in% cov2genes) & !grepl("gene-",gene) & contrast=="wu_vs_vero" & abs(log2FoldChange) >1 & padj < 0.01 &! is.na(padj)) %>% arrange(dplyr::desc(log2FoldChange),padj) %>%
@@ -117,7 +117,7 @@ deg_tables <- list(
     dplyr::select(gene,symbol,gene_name,log2FoldChange,pvalue,padj,lfcSE,baseMean) %>% distinct()
 )
 
-openxlsx::write.xlsx(deg_tables,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/DiffExprGenes_by_strain.xls")
+openxlsx::write.xlsx(deg_tables,"/plots/tables/DiffExprGenes_by_strain.xls")
 
 cov2genes<-c("S","ORF8","ORF7a","ORF7b","ORF6","ORF3a","ORF1ab","ORF10","N","M","E","ORF1a")
 
@@ -193,11 +193,11 @@ fc.cc.mf_sa_vs_vero<-gage(foldchanges_sa_vs_vero,gsets = go.cc.gs)
 # fc.signal.greater_uk_vs_vero<-as.data.frame(fc.kegg.sigmet_uk_vs_vero$greater) %>% filter(p.val<0.05) %>% mutate(contrast="uk_vs_vero",enrichment="greater")
 # fc.signal.greater_sa_vs_vero<-as.data.frame(fc.kegg.sigmet_sa_vs_vero$greater) %>% filter(p.val<0.05) %>% mutate(contrast="sa_vs_vero",enrichment="greater")
 # 
-# fwrite(rbind(fc.signal.less_wu_vs_vero,fc.signal.less_uk_vs_vero),"/home/akram/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/pathway_analysis/signal_enrichment_foldChanges_less.tsv", col.names=T,sep="\t")
+# fwrite(rbind(fc.signal.less_wu_vs_vero,fc.signal.less_uk_vs_vero),"differentialExpression/pathway_analysis/signal_enrichment_foldChanges_less.tsv", col.names=T,sep="\t")
 # 
-# fwrite(rbind(fc.signal.greater_wu_vs_vero,fc.signal.greater_uk_vs_vero,fc.signal.greater_sa_vs_vero),"/home/akram/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/pathway_analysis/signal_enrichment_foldChanges_greater.tsv", col.names=T,sep="\t")
+# fwrite(rbind(fc.signal.greater_wu_vs_vero,fc.signal.greater_uk_vs_vero,fc.signal.greater_sa_vs_vero),"differentialExpression/pathway_analysis/signal_enrichment_foldChanges_greater.tsv", col.names=T,sep="\t")
 
-setwd("~/MondalLab/BEA21P074_Roshan_Vaid/differentialExpression/pathway_analysis/plots/")
+setwd("/differentialExpression/pathway_analysis/plots/")
 fc.kegg.disease_wu_vs_vero$greater %>% as.data.frame() %>% filter(q.val < 0.05 &! is.na(q.val)) %>% mutate(name=rownames(.)) %>% head(50) %>% ggplot(.,aes(reorder(name,dplyr::desc(q.val)),set.size)) + geom_bar(stat = "identity", fill="steelblue") + coord_flip() + theme_light() + ylab("Set size") + xlab("Kegg Disease") + labs(title = "non-infected vs infected A.1",subtitle="Enrichment analysis (Kegg disease)") -> p1
 ggsave(filename = "kegg_disease_vero_vs_wu_fdr0.05.pdf",plot = p1,height = 8,width = 8,dpi=300,device = "pdf")
 
@@ -303,14 +303,14 @@ enrichrCov2sets_sa<-enrichr(sig_sa,"COVID-19_Related_Gene_Sets")
 #go_bp_sa %>% slot("result") %>% as.tibble()
 
 
-# pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/biological_process_differentiallyExpressedGenes_all.pdf", width = 10, height = 8,onefile = T)
+# pdf("/plots/biological_process_differentiallyExpressedGenes_all.pdf", width = 10, height = 8,onefile = T)
 # mydotplot(go_bp_wu,showCategory=30,x="Count") + labs(title = "GO:Biological process \n Differentially expressed genes Vero vs WU")
 # mydotplot(go_bp_uk,showCategory=30,x="Count") + labs(title = "GO:Biological process \n Differentially expressed genes Vero vs UK")
 # mydotplot(go_bp_sa,showCategory=30,x="Count") + labs(title = "GO:Biological process \n Differentially expressed genes Vero vs SA")
 # dev.off()
-tables_outdir="~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/"
+tables_outdir="/plots/tables/"
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichmentGO_topTerms_DEGs_by_Strain_jointPlot.pdf", width = 10, height = 8,onefile = T)
+pdf("/plots/compiled_figures/enrichmentGO_topTerms_DEGs_by_Strain_jointPlot.pdf", width = 10, height = 8,onefile = T)
 
 jointdotplot(go_bp_wu,go_bp_uk,go_bp_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n DEGs B.1, B.1.1.7, B.1.351")
 jointdotplot(go_mf_wu,go_mf_uk,go_mf_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Molecular function \n DEGs B.1, B.1.1.7, B.1.351")
@@ -328,8 +328,8 @@ plotEnrich(enrichrWP_sa$WikiPathways_2019_Human %>% filter(P.value<0.05),numChar
 dev.off()
 
 goTables_DEGs_all<-list("BP_DEGs_B.1"=go_bp_wu@result %>% filter(pvalue < 0.05) ,"BP_DEGs_B.1.1.7"=go_bp_uk@result %>% filter(pvalue < 0.05) ,"BP_DEGs_B.1.351"=go_bp_sa@result %>% filter(pvalue < 0.05) ,"MF_DEGs_B.1"=go_mf_wu@result %>% filter(pvalue < 0.05) ,"MF_DEGs_B.1.1.7"=go_mf_uk@result %>% filter(pvalue < 0.05) ,"MF_DEGs_B.1.351"=go_mf_sa@result %>% filter(pvalue < 0.05) ,"CC_DEGs_B.1"=go_cc_wu@result %>% filter(pvalue < 0.05) ,"CC_DEGs_B.1.1.7"=go_cc_uk@result %>% filter(pvalue < 0.05) ,"CC_DEGs_B.1.351"=go_cc_sa@result %>% filter(pvalue < 0.05) ,"KEGG_DEGs_B.1"=kegg_wu@result %>% filter(pvalue < 0.05) ,"KEGG_DEGs_B.1.1.7"=kegg_uk@result %>% filter(pvalue < 0.05),"KEGG_DEGs_B.1.351"=kegg_sa@result %>% filter(pvalue < 0.05),"EnrichrCov2Sets_B.1"=enrichrCov2sets_wu$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.1.7"=enrichrCov2sets_uk$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.351"=enrichrCov2sets_sa$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"WikiPaths_B.1"=enrichrWP_wu$WikiPathways_2019_Humangenes,"WikiPaths_DEGs_B.1.1.7"=enrichrWP_wu$WikiPathways_2019_Humangenes,"WikiPaths_DEGs_B.1.351"=enrichrWP_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05))
-openxlsx::write.xlsx(goTables_DEGs_all,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/EnrcihmentAnalysis_DEGs_by_Strain.xlsx")
-#goTables_DEGs_all<-openxlsx::read.xlsx("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/EnrcihmenAnalysis_DEGs_by_Strain.xlsx")
+openxlsx::write.xlsx(goTables_DEGs_all,"/plots/compiled_figures/tables/EnrcihmentAnalysis_DEGs_by_Strain.xlsx")
+#goTables_DEGs_all<-openxlsx::read.xlsx("/plots/compiled_figures/tables/EnrcihmenAnalysis_DEGs_by_Strain.xlsx")
 #common_diffexp_all<-res_all_lfcShrink
 
 diffexpGenes_wu<-logfc_wu_vs_vero %>% filter(abs(log2FoldChange) > 1 &!(gene %in% cov2genes) & padj < 0.01 &! is.na(padj)) %>% dplyr::select(gene) %>% distinct() %>% unlist() 
@@ -354,7 +354,7 @@ diffexpGenesDown_uk_entrez<-mapIds(org.Hs.eg.db,keys = diffexpGenesDown_uk, colu
 diffexpGenesDown_sa_entrez<-mapIds(org.Hs.eg.db,keys = diffexpGenesDown_sa, column = "ENTREZID",keytype = "SYMBOL",multiVals = "first")
 
 common_diffexp_genes<-intersect(intersect(diffexpGenes_wu,diffexpGenes_uk),diffexpGenes_sa)
-fwrite(as.data.frame(common_diffexp_genes),"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/common_DEGs_all.tsv", col.names = F, sep="\t")
+fwrite(as.data.frame(common_diffexp_genes),"/plots/compiled_figures/tables/common_DEGs_all.tsv", col.names = F, sep="\t")
 common_diffexp_genes_entrez<-mapIds(org.Hs.eg.db,keys = common_diffexp_genes, column = "ENTREZID",keytype = "SYMBOL",multiVals = "first")
 
 goBP_commonDiffExpGenes<-enrichGO(gene=common_diffexp_genes,OrgDb = org.Hs.eg.db, keyType = "SYMBOL", ont="BP",pvalueCutoff = 0.05,readable = F)%>% gofilter(.,level = c(7:10))
@@ -365,7 +365,7 @@ reactome_commonDiffExpGenes<-enrichPathway(common_diffexp_genes_entrez,pvalueCut
 enrichrWP_commonDiffExpGenes<-enrichr(common_diffexp_genes,"WikiPathways_2019_Human")
 enrichrCov2sets_commonDiffExpGenes<-enrichr(common_diffexp_genes,"COVID-19_Related_Gene_Sets")
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichmentGO_topTerms_commonDEGs.pdf", width = 12, height = 16)
+pdf("/plots/compiled_figures/enrichmentGO_topTerms_commonDEGs.pdf", width = 12, height = 16)
  mydotplot(goBP_commonDiffExpGenes,showCategory=30,x="Count", title="GO:Biological Process \n Common differentially expressed genes \n B.1, B.1.1.7, B.1.351")
  mydotplot(goMF_commonDiffExpGenes,showCategory=30,x="Count",title="GO:Molecular function \n Common differentially expressed genes \n B.1, B.1.1.7, B.1.351")
  mydotplot(goCC_commonDiffExpGenes,showCategory=30,x="Count", title="GO:Cellular component \n Common differentially expressed genes \n B.1, B.1.1.7, B.1.351")
@@ -381,8 +381,8 @@ plotEnrich(enrichrWP_commonDiffExpGenes$WikiPathways_2019_Human %>% filter(P.val
 dev.off()
 
 goTables_common_DEGS<-list("BP_commonDEGs"=goBP_commonDiffExpGenes@result %>% filter(pvalue < 0.05),"MF_commonDEGs"=goMF_commonDiffExpGenes@result %>% filter(pvalue < 0.05),"CC_commonDEGs"=goCC_commonDiffExpGenes@result %>% filter(pvalue < 0.05),"KEGG_common_DEGs"=kegg_commonDiffExpGenes,"EnrichrCov2Sets_commonDEGs"=enrichrCov2sets_commonDiffExpGenes$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"WikiPath_commonDEgs"=enrichrWP_commonDiffExpGenes$WikiPathways_2019_Human %>% filter(P.value < 0.05))
-openxlsx::write.xlsx(list("common_DEGs"=common_diffexp_genes),"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/commonDEGs_geneName_list.xlsx")
-openxlsx::write.xlsx(goTables_common_DEGS,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/EnrcihmenAnalysis_commonDEGs_All.xlsx")
+openxlsx::write.xlsx(list("common_DEGs"=common_diffexp_genes),"/plots/compiled_figures/tables/commonDEGs_geneName_list.xlsx")
+openxlsx::write.xlsx(goTables_common_DEGS,"/plots/compiled_figures/tables/EnrcihmenAnalysis_commonDEGs_All.xlsx")
 
 #Enrichment Up regulated genes by condition
 goBP_diffexpGenesUp_wu<-enrichGO(gene=diffexpGenesUp_wu,OrgDb = org.Hs.eg.db, keyType = "SYMBOL", ont="BP",pvalueCutoff = 0.05,readable = F) %>% gofilter(.,level = c(7:10))
@@ -410,7 +410,7 @@ enrichrWP_diffexpGenesUp_sa<-enrichr(diffexpGenesUp_sa,"WikiPathways_2019_Human"
 enrichrCov2sets_diffexpGenesUp_sa<-enrichr(diffexpGenesUp_sa,"COVID-19_Related_Gene_Sets")
 
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichmentGO_DEGs_Upregulated_by_Strain.pdf", width = 16, height = 10)
+pdf("/plots/compiled_figures/enrichmentGO_DEGs_Upregulated_by_Strain.pdf", width = 16, height = 10)
 
 jointdotplot(goBP_diffexpGenesUp_wu,goBP_diffexpGenesUp_uk,goBP_diffexpGenesUp_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n Up-regulated DEGs")
 jointdotplot(goMF_diffexpGenesUp_wu,goMF_diffexpGenesUp_uk,goMF_diffexpGenesUp_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Molecular function \n Up-regulated DEGs")
@@ -430,7 +430,7 @@ dev.off()
 
 
 # Supplementary Fig1C -----------------------------------------------------
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/compilation/suppFig1C_enrichmentGO_DEGs_Up-and-Down_regulated_by_Strain.pdf", width = 16, height = 8)
+pdf("/plots/compiled_figures/compilation/suppFig1C_enrichmentGO_DEGs_Up-and-Down_regulated_by_Strain.pdf", width = 16, height = 8)
 plot_grid(
 jointdotplot(goBP_diffexpGenesUp_wu,goBP_diffexpGenesUp_uk,goBP_diffexpGenesUp_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n Up-regulated DEGs") + scale_y_discrete(position = "left"),
 jointdotplot(goBP_diffexpGenesDown_wu,goBP_diffexpGenesDown_uk,goBP_diffexpGenesDown_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n Down-regulated DEGs"), nrow = 1, ncol = 2
@@ -440,8 +440,8 @@ dev.off()
 goTables_Up<-list("BP_Up_B.1"=goBP_diffexpGenesUp_wu@result %>% filter(pvalue < 0.05) ,"BP_Up_B.1.1.7"=goBP_diffexpGenesUp_uk@result %>% filter(pvalue < 0.05) ,"BP_Up_B.1.351"=goBP_diffexpGenesUp_sa@result %>% filter(pvalue < 0.05) ,"MF_Up_B.1"=goMF_diffexpGenesUp_wu@result %>% filter(pvalue < 0.05) ,"MF_Up_B.1.1.7"=goMF_diffexpGenesUp_uk@result %>% filter(pvalue < 0.05) ,"MF_Up_B.1.351"=goMF_diffexpGenesUp_sa@result %>% filter(pvalue < 0.05) ,"CC_Up_B.1"=goCC_diffexpGenesUp_wu@result %>% filter(pvalue < 0.05) ,"CC_Up_B.1.351"=goCC_diffexpGenesUp_uk@result %>% filter(pvalue < 0.05) ,"CC_Up_B.1.351"=goCC_diffexpGenesUp_sa@result %>% filter(pvalue < 0.05) ,"KEGG_Up_B.1"=kegg_diffexpGenesUp_wu@result %>% filter(pvalue < 0.05)  ,"KEGG_Up_B.1.1.7"=kegg_diffexpGenesUp_uk@result %>% filter(pvalue < 0.05) ,"KEGG_Up_B.1.351"=kegg_diffexpGenesUp_sa@result %>% filter(pvalue < 0.05) ,"EnrichrCov2Sets_B.1"=enrichrCov2sets_diffexpGenesUp_wu$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.1.7"=enrichrCov2sets_diffexpGenesUp_uk$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.351"=enrichrCov2sets_diffexpGenesUp_sa$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"KEGG_Up_B.1"=enrichrWP_diffexpGenesUp_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05) ,"KEGG_Up_B.1.1.7"=enrichrWP_diffexpGenesUp_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05) ,"KEGG_Up_B.1.351"=enrichrWP_diffexpGenesUp_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05))
 
 
-openxlsx::write.xlsx(list("Up_B.1"=diffexpGenesUp_wu,"Up_B.1.1.7"=diffexpGenesUp_uk,"Up_B.1.351"=diffexpGenesUp_sa),"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/DEGs_Up-regulated_by_Strain_geneName_list.xlsx")
-openxlsx::write.xlsx(goTables_Up,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/enrcihmenGO_DEGs_Up-regulated_by_Strain.xlsx")
+openxlsx::write.xlsx(list("Up_B.1"=diffexpGenesUp_wu,"Up_B.1.1.7"=diffexpGenesUp_uk,"Up_B.1.351"=diffexpGenesUp_sa),"/plots/compiled_figures/tables/DEGs_Up-regulated_by_Strain_geneName_list.xlsx")
+openxlsx::write.xlsx(goTables_Up,"/plots/compiled_figures/tables/enrcihmenGO_DEGs_Up-regulated_by_Strain.xlsx")
 
 #Down regulated genes:
 goBP_diffexpGenesDown_wu<-enrichGO(gene=diffexpGenesDown_wu,OrgDb = org.Hs.eg.db, keyType = "SYMBOL", ont="BP",pvalueCutoff = 0.05,readable = F) %>% gofilter(.,level = c(7:10))
@@ -469,7 +469,7 @@ enrichrWP_diffexpGenesDown_sa<-enrichr(diffexpGenesDown_sa,"WikiPathways_2019_Hu
 enrichrCov2sets_diffexpGenesDown_sa<-enrichr(diffexpGenesDown_sa,"COVID-19_Related_Gene_Sets")
 
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichmentGO_DEGs_Downregulated_by_Strain.pdf", width = 16, height = 10)
+pdf("/plots/compiled_figures/enrichmentGO_DEGs_Downregulated_by_Strain.pdf", width = 16, height = 10)
 jointdotplot(goBP_diffexpGenesDown_wu,goBP_diffexpGenesDown_uk,goBP_diffexpGenesDown_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n Down-regulated DEGs")
 jointdotplot(goMF_diffexpGenesDown_wu,goMF_diffexpGenesDown_uk,goMF_diffexpGenesDown_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Molecular function \n Down-regulated DEGs")
 jointdotplot(goCC_diffexpGenesDown_wu,goCC_diffexpGenesDown_uk,goCC_diffexpGenesDown_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Cellular component \n Down-regulated DEGs")
@@ -486,7 +486,7 @@ plotEnrich(enrichrWP_diffexpGenesDown_sa$WikiPathways_2019_Human %>% filter(P.va
 dev.off()
 
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichment_EnrichrCOVIDsets_UpandDown_regulated_by_Strain.pdf", width = 16, height = 10)
+pdf("/plots/compiled_figures/enrichment_EnrichrCOVIDsets_UpandDown_regulated_by_Strain.pdf", width = 16, height = 10)
 
 jointdotplotEnrichr(enrichrCov2sets_diffexpGenesDown_wu$`COVID-19_Related_Gene_Sets`,
                     enrichrCov2sets_diffexpGenesDown_uk$`COVID-19_Related_Gene_Sets`,
@@ -502,8 +502,8 @@ dev.off()
 
 goTables_Down<-list("BP_Down_B.1"=goBP_diffexpGenesDown_wu@result %>% filter(pvalue < 0.05),"BP_Down_B.1.1.7"=goBP_diffexpGenesDown_uk@result %>% filter(pvalue < 0.05),"BP_Down_B.1.351"=goBP_diffexpGenesDown_sa@result %>% filter(pvalue < 0.05),"MF_Down_B.1"=goMF_diffexpGenesDown_wu@result %>% filter(pvalue < 0.05),"MF_Down_B.1.1.7"=goMF_diffexpGenesDown_uk@result %>% filter(pvalue < 0.05),"MF_Down_B.1.351"=goMF_diffexpGenesDown_sa@result %>% filter(pvalue < 0.05),"CC_Down_B.1"=goCC_diffexpGenesDown_wu@result %>% filter(pvalue < 0.05),"CC_Down_B.1.1.7"=goCC_diffexpGenesDown_uk@result %>% filter(pvalue < 0.05),"CC_Down_B.1.351"=goCC_diffexpGenesDown_sa@result %>% filter(pvalue < 0.05),"KEGG_Down_B.1"=kegg_diffexpGenesDown_wu@result %>% filter(pvalue < 0.05),"KEGG_Down_B.1.1.7"=kegg_diffexpGenesDown_uk@result %>% filter(pvalue < 0.05),"KEGG_Down_B.1.351"=kegg_diffexpGenesDown_sa@result %>% filter(pvalue < 0.05),"EnrichrCov2Sets_B.1"=enrichrCov2sets_diffexpGenesDown_wu$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.1.7"=enrichrCov2sets_diffexpGenesDown_uk$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_B.1.351"=enrichrCov2sets_diffexpGenesDown_sa$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"WikiPath_Down_B.1"=enrichrWP_diffexpGenesDown_wu$WikiPathways_2019_Humangenes,"WikiPath_Down_B.1.1.7"=enrichrWP_diffexpGenesDown_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05),"WikiPath_Down_B.1.351"=enrichrWP_diffexpGenesDown_wu$WikiPathways_2019_Human %>% filter(P.value < 0.05))
 
-openxlsx::write.xlsx(list("Down_B.1"=diffexpGenesDown_wu,"Down_B.1.1.7"=diffexpGenesDown_uk,"Down_B.1.351"=diffexpGenesDown_sa),"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/Down-regulatedDEGs_geneName_list.xlsx")
-openxlsx::write.xlsx(goTables_Down,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/tables/EnrcihmenAnalysis_Down-regulatedDEGs_by_Strain.xlsx")
+openxlsx::write.xlsx(list("Down_B.1"=diffexpGenesDown_wu,"Down_B.1.1.7"=diffexpGenesDown_uk,"Down_B.1.351"=diffexpGenesDown_sa),"/plots/compiled_figures/tables/Down-regulatedDEGs_geneName_list.xlsx")
+openxlsx::write.xlsx(goTables_Down,"/plots/compiled_figures/tables/EnrcihmenAnalysis_Down-regulatedDEGs_by_Strain.xlsx")
 
 
 exclusive_wu<-setdiff(diffexpGenes_wu,diffexpGenes_uk)
@@ -521,7 +521,7 @@ names(diffexpGenes_sa)<-diffexpGenes_sa
 
 ggvenn(list("B.1"=diffexpGenes_wu,"B.1.1.7"=diffexpGenes_uk,"B.1.351"=diffexpGenes_sa),columns = c("B.1","B.1.1.7","B.1.351"),stroke_color = "white",fill_color = c("#cb181d","#31a354","#e6550d")) + labs(title="Differentially expressed genes after infection") -> p1
 p1
-ggsave("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/SuppFig1_vennDiagram_allDEGs_after_infection.pdf", width = 8, height = 8,dpi=300,device = "pdf", plot = p1)
+ggsave("/plots/compiled_figures/SuppFig1_vennDiagram_allDEGs_after_infection.pdf", width = 8, height = 8,dpi=300,device = "pdf", plot = p1)
 
 
 names(diffexpGenesUp_wu)<-diffexpGenesUp_wu
@@ -530,7 +530,7 @@ names(diffexpGenesUp_sa)<-diffexpGenesUp_sa
 
 ggvenn(list("B.1"=diffexpGenesUp_wu,"B.1.1.7"=diffexpGenesUp_uk,"B.1.351"=diffexpGenesUp_sa),columns = c("B.1","B.1.1.7","B.1.351"),stroke_color = "white",fill_color = c("#cb181d","#31a354","#e6550d")) + labs(title="Upregulated genes") -> p2
 p2
-ggsave("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/vennDiagram_Up-regulatedDEGs.pdf", plot = p2 ,width = 8, height = 8,dpi=300,device = "pdf")
+ggsave("/plots/compiled_figures/vennDiagram_Up-regulatedDEGs.pdf", plot = p2 ,width = 8, height = 8,dpi=300,device = "pdf")
 
 names(diffexpGenesDown_wu)<-diffexpGenesDown_wu
 names(diffexpGenesDown_uk)<-diffexpGenesDown_uk
@@ -538,19 +538,19 @@ names(diffexpGenesDown_sa)<-diffexpGenesDown_sa
 
 ggvenn(list("B.1"=diffexpGenesDown_wu,"B.1.1.7"=diffexpGenesDown_uk,"B.1.351"=diffexpGenesDown_sa),columns = c("B.1","B.1.1.7","B.1.351"),stroke_color = "white",fill_color = c("#cb181d","#31a354","#e6550d")) + labs(title="Downregulated genes") -> p3
 p3
-ggsave("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/vennDiagram_Down-regulatedDEGs.pdf", plot = p3 ,width = 8, height = 8,dpi=300,device = "pdf")
+ggsave("/plots/compiled_figures/vennDiagram_Down-regulatedDEGs.pdf", plot = p3 ,width = 8, height = 8,dpi=300,device = "pdf")
 
 
-ggsave("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/Fig1_vennDiagram_UpandDown-regulated_DEGs.pdf", plot = plot_grid(p2,p3, labels = c("A","B"),  align = "h", vjust =7.5, label_size = 14)  ,width = 8.5, height = 8.5,dpi=300,device = "pdf")
+ggsave("/plots/compiled_figures/Fig1_vennDiagram_UpandDown-regulated_DEGs.pdf", plot = plot_grid(p2,p3, labels = c("A","B"),  align = "h", vjust =7.5, label_size = 14)  ,width = 8.5, height = 8.5,dpi=300,device = "pdf")
 
 
-res_all_lfcShrink %>% mutate(deg_category=if_else(log2FoldChange >1,"Up",if_else(log2FoldChange < -1,"Down",if_else(log2FoldChange<1 & log2FoldChange >-1, "NoDEG","NA")))) %>% filter(padj<0.01 &! is.na(padj) &!(gene %in% cov2genes)) %>% group_by(contrast) %>% dplyr::select(gene,deg_category) %>% distinct() %>% dplyr::count(deg_category) %>% separate(contrast,into =c("strain","non_infected"),sep="_vs_") %>% openxlsx::write.xlsx("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/numberOf_diffexpGenes.xlsx")
+res_all_lfcShrink %>% mutate(deg_category=if_else(log2FoldChange >1,"Up",if_else(log2FoldChange < -1,"Down",if_else(log2FoldChange<1 & log2FoldChange >-1, "NoDEG","NA")))) %>% filter(padj<0.01 &! is.na(padj) &!(gene %in% cov2genes)) %>% group_by(contrast) %>% dplyr::select(gene,deg_category) %>% distinct() %>% dplyr::count(deg_category) %>% separate(contrast,into =c("strain","non_infected"),sep="_vs_") %>% openxlsx::write.xlsx("/plots/tables/numberOf_diffexpGenes.xlsx")
 #res_all_lfcShrink %>% mutate(deg_category=if_else(log2FoldChange >2,"Up",if_else(log2FoldChange < -2,"Down",if_else(log2FoldChange<2 & log2FoldChange >-2, "NoDEG","NA")))) %>% filter(padj<0.01 &! is.na(padj)) %>% group_by(contrast) %>% dplyr::select(gene,deg_category) %>% distinct() %>% dplyr::count(deg_category) %>% separate(contrast,into =c("strain","non_infected"),sep="_vs_") %>% ggplot(.,aes(strain,n,fill=deg_category)) + geom_bar(stat = "identity",position = position_stack(),width = 0.5) + scale_fill_viridis_d() + theme(panel.background = element_blank(),panel.grid = element_blank()) + theme_light()
 
 count_diffexpGenes<-c("B.1"=length(unique(diffexpGenes_wu)),"B.1.1.7"=length(unique(diffexpGenes_uk)),"B.1.351"=length(unique(diffexpGenes_sa)))
 
 
-openxlsx::write.xlsx(res_all_lfcShrink %>% filter(gene %in% common_diffexp_genes) %>% dplyr::select(gene) %>% distinct(), "~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/Table_differentialExpression_CommonDEGs_AllConditions.xls")
+openxlsx::write.xlsx(res_all_lfcShrink %>% filter(gene %in% common_diffexp_genes) %>% dplyr::select(gene) %>% distinct(), "/plots/tables/Table_differentialExpression_CommonDEGs_AllConditions.xls")
 
 #normalized_counts <- counts(dds, normalized=TRUE)
 
@@ -595,7 +595,7 @@ enrichrWP_commonDEGs_uk_sa<-enrichr(commonDEGs_uk_sa,"WikiPathways_2019_Human")
 enrichrCov2sets_commonDEGs_uk_sa<-enrichr(commonDEGs_uk_sa,"COVID-19_Related_Gene_Sets")
 
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/enrichmentGO_commonDEGs_Paired_Strain_Comparisons.pdf", width = 20, height = 10)
+pdf("/plots/compiled_figures/enrichmentGO_commonDEGs_Paired_Strain_Comparisons.pdf", width = 20, height = 10)
 
 jointdotplot(goBP_commonDEGs_wu_uk,goBP_commonDEGs_wu_sa,goBP_commonDEGs_uk_sa,names = c("B.1\n&\nB.1.1.7","B.1 & B.1.351","B.1.1.7 & B.1.351"),title = "GO:Biological Process \n Common DEGs Paired Strain Comparisons")
 jointdotplot(goMF_commonDEGs_wu_uk,goMF_commonDEGs_wu_sa,goMF_commonDEGs_uk_sa,names = c("B.1 & B.1.1.7","B.1 & B.1.351","B.1.1.7 & B.1.351"),title = "GO:Molecular Function \n Common DEGs Paired Strain Comparisons")
@@ -614,8 +614,8 @@ dev.off()
 
 goTables_commonDEgs_pairedStrains<-list("BP_commonDEGs_WU_UK"=goBP_commonDEGs_wu_uk@result %>% filter(pvalue < 0.05),"BP_commonDEGs_SA_UK"=goBP_commonDEGs_uk_sa@result %>% filter(pvalue < 0.05),"BP_commonDEGs_WU_SA"=goBP_commonDEGs_wu_sa@result %>% filter(pvalue < 0.05),"MF_commonDEGs_WU_UK"=goMF_commonDEGs_wu_uk@result %>% filter(pvalue < 0.05),"MF_commonDEGs_SA_UK"=goMF_commonDEGs_uk_sa@result %>% filter(pvalue < 0.05),"MF_commonDEGs_WU_SA"=goMF_commonDEGs_wu_sa@result %>% filter(pvalue < 0.05),"CC_commonDEGs_WU_UK"=goCC_commonDEGs_wu_uk@result %>% filter(pvalue < 0.05),"CC_commonDEGs_SA_UK"=goCC_commonDEGs_uk_sa@result %>% filter(pvalue < 0.05),"CC_commonDEGs_WU_SA"=goCC_commonDEGs_wu_sa@result %>% filter(pvalue < 0.05),"KEGG_commonDEGs_WU_UK"=kegg_commonDEGs_wu_uk@result %>% filter(pvalue < 0.05),"KEGG_commonDEGs_SA_UK"=kegg_commonDEGs_uk_sa@result %>% filter(pvalue < 0.05),"KEGG_commonDEGs_WU_SA"=kegg_commonDEGs_wu_sa@result %>% filter(pvalue < 0.05),"EnrichrCov2Sets_WU"=enrichrCov2sets_commonDEGs_wu_uk$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_UK"=enrichrCov2sets_commonDEGs_uk_sa$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"EnrichrCov2Sets_SA"=enrichrCov2sets_commonDEGs_wu_sa$`COVID-19_Related_Gene_Sets` %>% filter(P.value < 0.05),"WikiPath_commonDEGs_WU_UK"=enrichrWP_commonDEGs_wu_uk$WikiPathways_2019_Humangenes,"WikiPath_commonDEGs_SA_UK"=enrichrWP_commonDEGs_wu_uk$WikiPathways_2019_Human %>% filter(P.value < 0.05),"WikiPath_commonDEGs_WU_SA"=enrichrWP_commonDEGs_wu_uk$WikiPathways_2019_Human %>% filter(P.value < 0.05))
 
-openxlsx::write.xlsx(list("Down_WU"=commonDEGs_wu_uk,"Down_UK"=commonDEGs_uk_sa,"Down_SA"=commonDEGs_wu_sa),"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/commonDEGs_Paired_Strain_Comparisons_list.xlsx")
-openxlsx::write.xlsx(goTables_commonDEgs_pairedStrains,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/EnrcihmenAnalysis_commonDEGs_Paired_Strain_Comparisons.xlsx")
+openxlsx::write.xlsx(list("Down_WU"=commonDEGs_wu_uk,"Down_UK"=commonDEGs_uk_sa,"Down_SA"=commonDEGs_wu_sa),"/plots/tables/commonDEGs_Paired_Strain_Comparisons_list.xlsx")
+openxlsx::write.xlsx(goTables_commonDEgs_pairedStrains,"/plots/tables/EnrcihmenAnalysis_commonDEGs_Paired_Strain_Comparisons.xlsx")
 
 
 
@@ -767,7 +767,7 @@ union_goBP %>%
   filter(grepl("METTL3|METTL14|KIAA1429|CBLL1|WTAP|RBM15|RBM15B|ZC3H13|SPEN||YTHDC1|YTHDC2|YTHDF1|YTHDF2|YTHDF3|HNRNPA2B1|HNRNPC|FTO|ALKBH5",geneID, perl = T)) %>% 
   filter(grepl("(viral entry into host cell | virus | viral|splic|SRP|RNA catabolic process|RNA stabilization|stress granule|translation | protein targeting | cilium | localization to membrane|translational initiation|stress response|response to stress| nuclear export|export from nucleus)",Description,perl=T,ignore.case = T)) %>%
   arrange(pvalue) %>% dplyr::select(ID,pvalue,Description) %>%
-  fwrite(.,"~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/GOTerms_writers_readers_erasers_GOBP_filtered.txt", sep="\t",col.names = F)
+  fwrite(.,"/plots/tables/GOTerms_writers_readers_erasers_GOBP_filtered.txt", sep="\t",col.names = F)
 
 
 diffExp_m6aWritersReadersErasers <- res_all_lfcShrink %>% filter(gene %in% c(writers,readers,erasers)) %>% filter(abs(log2FoldChange)>1 & padj<0.01 &!is.na(padj)) %>% dplyr::select(gene) %>% distinct() %>% unlist()
@@ -806,9 +806,9 @@ commonTerms_WU_SA_m6Aprots <- commonTerms_WU_SA %>%
 commonTerms_SA_UK_m6Aprots <- commonTerms_SA_UK %>% 
   filter(grepl("(HNRNPC|HNRNPA2B1|SPEN|RBM15|WTAP|KIAA1429|YTHDC1|YTHDF1|FTO|RBM15B)",geneID_sa, perl=T) & grepl("(HNRNPC|HNRNPA2B1|SPEN|RBM15|WTAP|KIAA1429|YTHDC1|YTHDF1|FTO|RBM15B)",geneID_uk, perl=T))
 
-openxlsx::write.xlsx(list("commonTerms_WU_UK"=commonTerms_WU_UK,"commonTerms_WU_SA"=commonTerms_WU_SA,"commonTerms_SA_UK"=commonTerms_SA_UK), file = "~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/commonGOTerms_biological_process_strain_pairs_All.xlsx")
+openxlsx::write.xlsx(list("commonTerms_WU_UK"=commonTerms_WU_UK,"commonTerms_WU_SA"=commonTerms_WU_SA,"commonTerms_SA_UK"=commonTerms_SA_UK), file = "/plots/tables/commonGOTerms_biological_process_strain_pairs_All.xlsx")
 
-openxlsx::write.xlsx(list("commonTerms_WU_UK"=commonTerms_WU_UK_m6Aprots,"commonTerms_WU_SA"=commonTerms_WU_SA_m6Aprots,"commonTerms_SA_UK"=commonTerms_SA_UK_m6Aprots), file = "~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/tables/commonGOTerms_biological_process_strain_pairs_m6AProteinsInBothStrains.xlsx")
+openxlsx::write.xlsx(list("commonTerms_WU_UK"=commonTerms_WU_UK_m6Aprots,"commonTerms_WU_SA"=commonTerms_WU_SA_m6Aprots,"commonTerms_SA_UK"=commonTerms_SA_UK_m6Aprots), file = "/plots/tables/commonGOTerms_biological_process_strain_pairs_m6AProteinsInBothStrains.xlsx")
 
 commonTerms_All<- inner_join(inner_join(sigTerms_wu,sigTerms_uk, by=c("ID_wu"="ID_uk")),sigTerms_sa,by=c("ID_wu"="ID_sa")) 
 
@@ -869,7 +869,7 @@ jointdotplotHoriz<-function(df1,df2,df3,names,title){
   return(p)
 }
 
-pdf("~/MondalLab/BEA21P074_Roshan_Vaid/plots/manuscript_figures/compiled_figures/compilation/Fig1C_GOBiologicalProcess_DEGsAll_horizontal_20211004.pdf", width = 12,height = 6)
+pdf("/plots/compiled_figures/compilation/Fig1C_GOBiologicalProcess_DEGsAll_horizontal_20211004.pdf", width = 12,height = 6)
 
 jointdotplotHoriz(go_bp_wu,go_bp_uk,go_bp_sa,names = c("B.1","B.1.1.7","B.1.351"),title = "GO:Biological process \n DEGs B.1, B.1.1.7, B.1.351")
 
