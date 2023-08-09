@@ -1,2 +1,3 @@
-# Custom scripts
-General repository with custom scripts for data processing, bioinformatic workflows and downstream analysis
+# Akram Mendez
+## Bioinformatics | Data Science | Computational Biology
+General repository with custom scripts for data processing, analysis and bioinformatic workflows
