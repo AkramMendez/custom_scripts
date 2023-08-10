@@ -1,6 +1,9 @@
 # Akram Mendez
 #### Bioinformatics | Data Science | Computational Biology
-**Code repository with custom scripts for data processing and downstream analysis of NGS data**
+
+### Bioinformatics Analysis Scripts Repository
+
+Welcome to my repository of bioinformatics analysis scripts. This repository contains a collection of scripts that I've developed for various bioinformatics tasks, including differential expression analysis, transcriptomics, epigenetics and custom downstream analyses.
 
 ### Contents
 ```
@@ -36,4 +39,6 @@
 └── transcriptomics:         Transcriptome assembly, differential exon usage.
 ```
 
+If you have any questions or suggestions, feel free to reach out to me:
+- LinkedIn: [Akram Mendez]([https://www.linkedin.com/in/akram-mendez/](https://www.linkedin.com/in/akram-mendez/))
 
