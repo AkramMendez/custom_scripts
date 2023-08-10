@@ -2,7 +2,7 @@
 #### Bioinformatics | Data Science | Computational Biology
 **General repository with custom scripts for data processing and downstream analysis of NGS data**
 ### Contents
-
+```
 ├── differentialExpression
 ├── downstream_analyses
 ├── genomic_visualization
@@ -14,6 +14,6 @@
 ├── quantification
 ├── query_databases
 └── transcriptomics
-
+```
 
 
