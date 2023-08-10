@@ -1,8 +1,8 @@
 # Akram Mendez
 #### Bioinformatics | Data Science | Computational Biology
-General repository with custom scripts for data processing, analysis and bioinformatic workflows
+**General repository with custom scripts for data processing and downstream analysis of NGS data**
+### Contents
 
-- Contents
 ├── differentialExpression
 ├── downstream_analyses
 ├── genomic_visualization
@@ -14,4 +14,6 @@ General repository with custom scripts for data processing, analysis and bioinfo
 ├── quantification
 ├── query_databases
 └── transcriptomics
+
+
 
