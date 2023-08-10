@@ -40,5 +40,5 @@ Welcome to my repository of bioinformatics analysis scripts. This repository con
 ```
 
 If you have any questions or suggestions, feel free to reach out to me:
-- LinkedIn: [Akram Mendez]([https://www.linkedin.com/in/akram-mendez/](https://www.linkedin.com/in/akram-mendez/))
+- LinkedIn: [Akram Mendez](https://www.linkedin.com/in/akram-mendez/)
 
