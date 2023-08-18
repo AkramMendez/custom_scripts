@@ -17,7 +17,7 @@ name=$1
 inputdir=$(realpath $2)
 outdir=$(realpath $3)
 
-gtf="CHM13_hg38chrY.gtf"
+gtf="CHM13_T2T.gtf"
 
 #### T2T CHM13 Transcriptome
 transcript_fasta="chm13.draft_v1.1_transcriptome.fa"
