@@ -12,10 +12,10 @@ module load MEMEsuite/5.1.1
 module load BEDTools/2.29.2
 module load samtools
 
-#/home/amendez/subtelProject/mappings_hg38SubtelEcoli/fullbam/downsamp50M
 
-gtf="/crex/proj/nb_storage/private/subtel_project/hybridGenome_hg38SubtelEcoli/hybridHg38SubtelEcoli_v3/hybGenome.hg38.masked.humanSTF500.ecoli.1based.gtf"
-ref_genome="/crex/proj/nb_storage/private/subtel_project/hybridGenome_hg38SubtelEcoli/hybridHg38SubtelEcoli_v3/hybGenome.hg38.masked.humanSTF500.ecoli.fa"
+
+gtf="hybGenome.hg38.masked.humanSTF500.ecoli.1based.gtf"
+ref_genome="hybGenome.hg38.masked.humanSTF500.ecoli.fa"
 IP=$(realpath $1)
 input=$(realpath $2)
 sample_name=$3
@@ -27,10 +27,6 @@ mkdir -p ${outdir}/MACS2_${sample_name}
 n=$(echo "$(($SLURM_NTASKS-1))")
 
 cd ${TMPDIR}
-
-#index="/crex/proj/nb_project/private/data/m6aprotocol/bowtie_index/GRCh38_noalt_as/GRCh38_noalt_as/GRCh38_noalt_as"
-#outdir="/crex/proj/nb_storage/private/m6a_project/m6a_natprot"
-#cd ${outdir}
 
 #NOTE: The bowtie index needs to be located in the same folder of the analysis pipeline.
 #echo "Starting Bowtie mapping for IP"

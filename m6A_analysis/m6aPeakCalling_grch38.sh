@@ -15,15 +15,12 @@ module load samtools
 
 
 
-gtf="/proj/nb_project/private/genomes/gencode.v36.chr_patch_hapl_scaff.basic.annotation.gtf"
-hg38="/proj/nb_project/private/genomes/GRCh38.primary_assembly.genome.fa"
+gtf="gencode.v36.chr_patch_hapl_scaff.basic.annotation.gtf"
+hg38="GRCh38.primary_assembly.genome.fa"
 IP=$1
 input=$2
 n=$(echo "$(($SLURM_NTASKS-1))")
 
-#index="/crex/proj/nb_project/private/data/m6aprotocol/bowtie_index/GRCh38_noalt_as/GRCh38_noalt_as/GRCh38_noalt_as"
-#outdir="/crex/proj/nb_storage/private/m6a_project/m6a_natprot"
-#cd ${outdir}
 
 #NOTE: The bowtie index needs to be located in the same folder of the analysis pipeline.
 #echo "Starting Bowtie mapping for IP"
