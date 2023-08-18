@@ -1,6 +1,5 @@
-
-
-
+library(tidyverse)
+library(data.table)
 
 
 # Reported genes after infection took from the supplementary data of Wyler et al., 2021 
@@ -85,7 +84,7 @@ res_all_lfcShrink %>%
 
 #Differentially expressed genes from Blanco-Melo et al,.2020:
 # "Differentially expressed genes (DEGs) were characterized for each sample (|L2FC| > 1, p-adjusted-value < 0.05)"
-meloData <- readxl::read_xlsx("~/MondalLab/BEA21P074_Roshan_Vaid/plots/cov2_figures_2022/differentially_expressed_genes_patients_covid19_Blanco-Melo2020.xlsx", sheet = 2, col_types = c("chr","num","num","num","num","num","chr"))
+meloData <- readxl::read_xlsx("differentially_expressed_genes_patients_covid19_Blanco-Melo2020.xlsx", sheet = 2, col_types = c("chr","num","num","num","num","num","chr"))
 
 meloData <- meloData %>% filter(status=="OK")
 meloData <- meloData %>% filter(abs(log2FoldChange) >2 & padj < 0.05 &! is.na(padj))
