@@ -1,0 +1,133 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+You will have 75 minutes to complete this test. There are no tricks. If something is unclear, please make assumptions.  Return / reply all to j.podesta@imperial.ac.uk when you’re finished; you may not complete all of the tasks within the allocated time – this is perfectly fine. Please just do your best!
+
+
+Choose a language you are proficient in (R would be preferred if you are comfortable with it) to create a simulated dataset incorporating multiple features for two distinct groups: A and B.
+
+
+As part of your analysis, generate visualizations that demonstrate the data, highlight the differences, and showcase the statistical methodologies you've employed to discern these differences. Compile your findings in a comprehensive, annotated report that details the data simulation process, the analysis undertaken, and the results obtained. Your report should include your commented code for transparency and reproducibility.
+
+ 
+
+Bonus Points:
+
+ 
+
+•              Create a compelling narrative around the dataset you've simulated. What could this data represent in a real-world context?
+
+•              Opt for an unusual statistical distribution in your simulation to increase the complexity of the data.
+
+•              For a greater challenge, make your simulated dataset multivariate. For example, the effects could only be detectable in males from group B.
+
+•              Develop a 2D visual representation of your simulated dataset to provide a broader perspective on the data structure and relationships.
+
+•              Use version control to manage your project. Push your code and report to a public GitHub repository and provide the link with your submission.
+
+•              Remember, this task tests not only your technical skills but also your ability to communicate complex ideas and methodologies effectively.
+
+
+Construction of a simulated dataset: This example shows a hypotetical sample of the expression of a group of genes in two different groups (A and B). Also, the measurements were integrated with annotations depending on the epigenetic status of each gene according to the prescence or absecence of the H3K27ac mark predicted to be associated with a gene (this is consideren only as a categorical variable).
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(ggprism)
+library(patchwork)
+
+set.seed(123)  # for reproducibility
+
+#Generate random samples simulating multiple features such as gene expression, read counts of a epigenetic mark,  of a gene in two groups (A and B)
+
+dataA <- data.frame(expression=c(sample(seq(0,1, by =0.1),500, replace = TRUE),sample(seq(0,0.5, by =0.1),500, replace = TRUE)),
+                    h3k27ac = c(rep("H3K27ac",500),rep("No H3K27ac",500)),
+                    group="A"
+                    )
+
+dataB <- data.frame(expression=c(sample(seq(0,2, by =0.1),500, replace = TRUE),sample(seq(0,0.5, by =0.1),500, replace = TRUE)),
+                    h3k27ac = c(rep("H3K27ac",500),rep("No H3K27ac",500)),
+                group="B")
+
+# Bind datasets
+
+df <- rbind(dataA,dataB)
+
+summary(dataA)
+
+summary(dataB)
+```
+
+
+Carry out the necessary statistical tests to ascertain the differences between these groups.
+
+To analyze the differences between groups, we can focus first on analyzing the differences in gene expression bewteen the group A and group B, disregarding their H3K27ac status. For this, we can compare the differences of the mean values of all genes across both groups using a T-test.
+
+We can also explore the distributions of gene expression with a boxplot and violin plot distributions to observe the densities of the expression data. We can see that there is an overlap between the two groups, we can assume that there is a difference en expression as the test showed enough statistical evidence to reject the hypothesis that the means are equal between group A and group B.
+
+```{r}
+# Test the differences in gene expression between group A and group B, disregarding their H3K27ac status:
+compare_means_general <- compare_means(df ,formula = expression ~ group,method = "t.test",paired = F,ref.group = "A")
+
+# Visualize the data:
+
+df %>% ggplot(., aes(group, expression)) +
+  geom_violin(alpha=0.5, width=0.3) +
+  geom_boxplot(alpha=0.1) +
+  stat_pvalue_manual(data = compare_means_general,
+                     label = "p.signif", 
+                     x="group2", 
+                     y.position = 2.5) +
+  theme_prism()
+
+
+```
+
+To further analyze the differences in gene expression across groups but also depending on the H3K27ac context of each gene, we can conduct another test to compare the differences between means, this time grouping each variable by gruoup and by H3K27ac status. We observe that in our simulated dataset, there is a clear difference in expression between group A and group B if a gene have a positive H3K27ac mark, whereas there is no difference in expression between group A and B in the genes without a positive H3K27ac mark. This might suggest that the H3K27ac mark is related with a higher expression in group B. Other analyses can be considered to further elucidate this relationship.
+
+
+```{r}
+
+
+# Test the differences in gene expression between group A and group B, accounting for their H3K27ac status:
+compare_means_by_h3k27ac <- compare_means(df ,formula = expression ~ group, group.by = "h3k27ac",method = "t.test",paired = F,ref.group = "A")
+
+# Visualize the data:
+
+pA <- df %>% dplyr::filter(h3k27ac=="H3K27ac") %>% ggplot(., aes(group, expression)) +
+  geom_violin(alpha=0.5, width=0.3) +
+  geom_boxplot(alpha=0.1) +
+  stat_pvalue_manual(data = compare_means_by_h3k27ac %>% dplyr::filter(h3k27ac=="H3K27ac") ,
+                     label = "p.signif", 
+                     x="group2", 
+                     y.position = 3) +
+  theme_prism() +
+  labs(title="H3K27ac")
+
+
+pB <- df %>% dplyr::filter(h3k27ac!="H3K27ac") %>% ggplot(., aes(group, expression)) +
+  geom_violin(alpha=0.5, width=0.3) +
+  geom_boxplot(alpha=0.1) +
+  stat_pvalue_manual(data = compare_means_by_h3k27ac %>% dplyr::filter(h3k27ac!="H3K27ac") ,
+                     label = "p.signif", 
+                     x="group2", 
+                     y.position = 3) +
+  theme_prism() +
+  labs(title="No H3K27ac")
+
+pA + pB
+
+```
+ 
+```{r}
+# Test the difference in any group using anothe statistical analysis method
+
+anova_AB <- aov(expression ~ group, data = df)
+
+summary(anova_AB)
+
+```
+ 
