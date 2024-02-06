@@ -14,6 +14,8 @@ Welcome to my repository of bioinformatics analysis scripts. This repository con
 ├── downstream_analyses:     In-depth analysis of processed NGS data, 
                              statistical analysis, data visualization.
 
+├── nf:                      NEXTFLOW pipeline scripts.
+
 ├── genomic_visualization:   Genome-wide signal visualization, 
                              metagene profiles, ideograms, 
                              UCSC genome browser.
