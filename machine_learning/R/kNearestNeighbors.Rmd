@@ -18,7 +18,7 @@ Supervised learning classification algorithm
 # Using data(cox2) exposes three R objects: cox2Descr is a data frame with the descriptor data, cox2IC50 is a numeric vector of IC50 assay values and cox2Class is a factor vector with the activity results.
 
 data(cox2)
-head(cox2Descr)
+head(cox2Descr[1:5,1:5])
 ```
 Splitting data as training and set datasets
 ```{r}
