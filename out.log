@@ -1,0 +1,10 @@
+
+VCFtools - 0.1.16
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf /home/akram/Documents/Akram/Biofidelity/chr20.variants_20072022.vcf
+	--TsTv-summary
+
+Error: VCF version must be v4.0, v4.1 or v4.2:
+You are using version VCFv4.3
